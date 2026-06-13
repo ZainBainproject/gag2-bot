@@ -1,21 +1,35 @@
+const express = require("express");
 const { Client, GatewayIntentBits } = require("discord.js");
 
+// ====== EXPRESS (fixes Render port issue) ======
+const app = express();
+app.get("/", (req, res) => res.send("Bot is running"));
+app.listen(3000, () => console.log("Web server started"));
+
+// ====== DISCORD BOT ======
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.GuildMessages
   ],
 });
 
-client.on("ready", () => {
+client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  const channel = client.channels.cache.get("1515316009177976872");
+  const channel = await client.channels.fetch("1515316009177976872");
 
+  if (!channel) {
+    console.log("Channel not found");
+    return;
+  }
+
+  // test message instantly
+  channel.send("🌱 Bot is ONLINE!");
+
+  // loop message every 5 minutes
   setInterval(() => {
-    if (!channel) return;
-    channel.send("🌱 Bot is online and working!");
+    channel.send("🌱 Bot is working!");
   }, 300000);
 });
 
